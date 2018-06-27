@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Test Pie Chart</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+  <link rel='stylesheet prefetch' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'>
+  <style>
+    @import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro);
+        body {
+          font-size: 15px;
+          font-family: 'Source Sans Pro', sans-serif;
+          color: #333;
+        }
+
+        path {
+          cursor: pointer;
+        }
+
+        form {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto
+        }
+
+        input {
+          border: 1px dotted;
+          width: 50%;
+        }
+
+        #pieChart {
+          /* border: red 1px dotted; */
+          
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto
+        }
+
+        .text-container {
+          /* border: 1px dotted; */
+          
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        }
+
+        #segmentText {
+          width: 100%;
+          padding: 20px;
+          text-align: centre;
+        }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+  <div class="row">
+    <div class="col-sm-6" id="pieChart"></div>
+    <div id="pieText" class="col-sm-6 text-container">
+      <h1 id="segmentTitle">Colors inspected form Google Logo using chrome color picker.</h1>
+      <p id="segmentText">Here Comes Text</p>
+    </div>
+  </div>
+</div>
+
+<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js'></script>
+<script src='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>
+<script>
+  /*This is JSON*/
+  var data_V1 = [
+    {
+  "Type": "A",
+  "Amount": 250,
+  "Description": "I am first"
+}, {
+  "Type": "B",
+  "Amount": 1000,
+  "Description": "I am second"
+}, {
+  "Type": "C",
+  "Amount": 600,
+  "Description": "I am third."
+}, {
+  "Type": "D",
+  "Amount": 1750,
+  "Description": "I am fourth."
+}];
+/*Try to understand the Code.*/
+var width = parseInt(d3.select('#pieChart').style('width'), 10);
+var height = width;
+var radius = (Math.min(width, height) - 15) / 2;
+
+var type = function getObject(obj) {
+  types = [];
+  for (var i = 0; i < obj.length; i++) {
+    types.push(obj[i].Type);
+  }
+  return types
+};
+
+var arcOver = d3.svg.arc()
+  .outerRadius(radius + 10)
+  .innerRadius(150);
+
+var color = d3.scale.ordinal()
+  .domain(type(data_V1))
+  .range(["#4285f4", "#34a853", "#fbbc05", "#ea4335"]);
+
+var arc = d3.svg.arc()
+  .outerRadius(radius - 10)
+  .innerRadius(150);
+
+var pie = d3.layout.pie()
+  .sort(null)
+  .value(function(d) {
+    return +d.Amount;
+  });
+
+change = function(d, i) {
+  var angle = 90 - ((d.startAngle * (180 / Math.PI)) + ((d.endAngle - d.startAngle) * (180 / Math.PI) / 2))
+  svg.transition()
+    .duration(1000)
+    .attr("transform", "translate(" + radius + "," + height / 2 + ") rotate(" + angle + ")")
+  d3.selectAll("path")
+    .transition()
+    .attr("d", arc)
+  d3.select(i)
+    .transition()
+    .duration(1000)
+    .attr("d", arcOver)
+};
+
+var svg = d3.select("#pieChart").append("svg")
+  .attr("width", '100%')
+  .attr("height", '100%')
+  .attr('viewBox', '0 0 ' + Math.min(width, height) + ' ' + Math.min(width, height))
+  .attr('preserveAspectRatio', 'xMinYMin')
+  .append("g")
+  .attr("transform", "translate(" + radius + "," + height / 2 + ")");
+
+var g = svg.selectAll("path")
+  .data(pie(data_V1))
+  .enter().append("path")
+  .style("fill", function(d) {
+    return color(d.data.Type);
+  })
+  .attr("d", arc)
+  .style("fill", function(d) {
+    return color(d.data.Type);
+  })
+  .on("click", function(d) {
+    change(d, this);
+    $('.text-container').hide();
+    $('#segmentTitle').replaceWith('<h1 id="segmentTitle">' + d.data.Type + ": " + d.data.Amount + '</h1>');
+    $('#')
+    $('#segmentText').replaceWith('<p id="segmentText">' + d.data.Description + '</p>');
+    $('.text-container').fadeIn(400);
+  });
+document.querySelector('style').textContent += '@media(max-width:767px) {#pieChart { transform: rotate(90deg); transform-origin: 50% 50%; transition: 1s; max-width: 50%; } .text-container { width: 100%; min-height: 0; }} @media(min-width:768px) {#pieChart { transition: 1s;}}'    
+</script>
+</body>
+</html>
